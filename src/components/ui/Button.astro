@@ -1,0 +1,153 @@
+---
+/**
+ * Botón / enlace de acción.
+ * - primary: bloque sólido (carbón sobre claro, marfil sobre oscuro) con el punto naranja.
+ * - text:    enlace editorial con subrayado que se dibuja al pasar el cursor.
+ * Los enlaces externos abren en pestaña nueva y lo anuncian a lectores de pantalla.
+ */
+interface Props {
+  href: string;
+  variant?: 'primary' | 'text';
+  external?: boolean;
+  /** Nombre del evento de conversión (ver src/scripts/track.ts). */
+  track?: string;
+  size?: 'default' | 'compact';
+  block?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  external = false,
+  track,
+  size = 'default',
+  block = false,
+  class: className,
+} = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, { 'btn--block': block }, className]}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener' : undefined}
+  data-track={track}
+>
+  {variant === 'primary' && <span class="btn__dot" aria-hidden="true" />}
+  <span class="btn__label"><slot /></span>
+  {external && <span class="visually-hidden"> (se abre en una pestaña nueva)</span>}
+  {
+    variant === 'text' && (
+      <span class="btn__arrow" aria-hidden="true">
+        {external ? '↗' : '→'}
+      </span>
+    )
+  }
+  {variant === 'primary' && external && <span class="btn__ext" aria-hidden="true">↗</span>}
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75em;
+    font-family: var(--font-sans);
+    font-size: var(--step-label);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Primario */
+  .btn--primary {
+    min-height: 3.25rem;
+    padding: 0 1.5rem 0 1.25rem;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border-radius: var(--radius);
+    transition: background-color var(--dur) var(--ease-out);
+  }
+
+  .btn--compact {
+    min-height: 2.75rem;
+    padding: 0 1.125rem 0 1rem;
+  }
+
+  .btn--block {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn__dot {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-orange);
+    flex: none;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .btn__ext {
+    font-size: 1.1em;
+    letter-spacing: 0;
+    opacity: 0.7;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--btn-bg) 88%, var(--c-orange));
+  }
+
+  .btn--primary:hover .btn__dot {
+    transform: scale(1.5);
+  }
+
+  .btn--primary:hover .btn__ext {
+    transform: translate(2px, -2px);
+  }
+
+  /* Texto */
+  .btn--text {
+    min-height: 2.75rem;
+    color: var(--fg);
+    gap: 0.5em;
+  }
+
+  .btn--text .btn__label {
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    padding-bottom: 0.35em;
+    transition: background-size var(--dur) var(--ease-out);
+  }
+
+  .btn--text .btn__arrow {
+    font-size: 1.15em;
+    letter-spacing: 0;
+    transition: transform var(--dur) var(--ease-out);
+    padding-bottom: 0.2em;
+  }
+
+  .btn--text:hover .btn__label,
+  .btn--text:focus-visible .btn__label {
+    background-size: 100% 2px;
+  }
+
+  .btn--text:hover .btn__arrow {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn *,
+    .btn {
+      transition: none !important;
+    }
+  }
+</style>

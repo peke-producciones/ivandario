@@ -1,0 +1,49 @@
+---
+/**
+ * Folio de sección, como en un libro: «02 — Motivos de consulta».
+ */
+interface Props {
+  number?: string;
+  as?: 'p' | 'span' | 'div';
+  class?: string;
+}
+const { number, as: Tag = 'p', class: className } = Astro.props;
+---
+
+<Tag class:list={['folio', 'label', className]}>
+  {
+    number && (
+      <span class="folio__n" aria-hidden="true">
+        {number}
+      </span>
+    )
+  }
+  {number && <span class="folio__dash" aria-hidden="true" />}
+  <span class="folio__text"><slot /></span>
+</Tag>
+
+<style>
+  .folio {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  .folio__n {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.15em;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--accent-text);
+  }
+
+  .folio__dash {
+    inline-size: 1.5rem;
+    block-size: var(--hairline);
+    background: currentColor;
+    opacity: 0.6;
+  }
+</style>

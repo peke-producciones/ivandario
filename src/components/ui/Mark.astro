@@ -1,0 +1,83 @@
+---
+/**
+ * El subrayado de lector: la marca gráfica de «comprender».
+ * Úsalo en una o dos palabras por titular, nunca más.
+ *   <Mark>comenzar</Mark>
+ * `delay` (ms) retrasa el trazo, útil cuando el titular entra animado.
+ * `trigger="load"` lo dibuja al cargar; `trigger="view"` al entrar en pantalla.
+ */
+interface Props {
+  delay?: number;
+  trigger?: 'load' | 'view';
+  italic?: boolean;
+}
+const { delay = 0, trigger = 'view', italic = true } = Astro.props;
+const Tag = italic ? 'em' : 'span';
+---
+
+<Tag class="mark" data-mark={trigger} style={`--mark-delay: ${delay}ms`}>
+  <slot />
+  <svg class="mark__line" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path d="M3 9.5 C 60 4.5, 140 11.5, 210 6.5 S 280 6, 297 7.5" pathLength="1"></path>
+  </svg>
+</Tag>
+
+<style>
+  .mark {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .mark__line {
+    position: absolute;
+    left: -0.02em;
+    right: -0.04em;
+    bottom: -0.06em;
+    width: calc(100% + 0.06em);
+    height: 0.16em;
+    min-height: 6px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .mark__line path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  @media (min-width: 64rem) {
+    .mark__line path {
+      stroke-width: 3px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mark__line path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+
+    .mark[data-mark='load'] .mark__line path {
+      animation: mark-draw 900ms var(--ease-in-out) var(--mark-delay) forwards;
+    }
+
+    :global(.js) .mark[data-mark='view'].is-visible .mark__line path {
+      animation: mark-draw 900ms var(--ease-in-out) var(--mark-delay) forwards;
+    }
+
+    /* Sin JS, los subrayados por scroll se muestran completos */
+    :global(html:not(.js)) .mark[data-mark='view'] .mark__line path {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes mark-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

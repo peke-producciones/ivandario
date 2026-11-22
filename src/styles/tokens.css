@@ -1,0 +1,121 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   TOKENS — Sistema «Margen»
+   Valores base del PROJECT BRAIN + derivados verificados para contraste AA.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@layer tokens {
+  :root {
+    /* Paleta de marca */
+    --c-ivory: #f5f2ec;
+    --c-charcoal: #202020;
+    --c-orange: #d66b3d;
+    --c-warm-gray: #b7b1a7;
+    --c-white: #ffffff;
+
+    /* Derivados tonales */
+    --c-ivory-deep: #ece7de; /* paneles sutiles sobre marfil */
+    --c-charcoal-raised: #2b2a28; /* superficies sobre carbón */
+    --c-ink-muted: #6b665e; /* texto secundario sobre claro — 5.1:1 */
+    --c-orange-deep: #a84c26; /* naranja para texto sobre claro — 5.0:1 */
+
+    /* Roles semánticos (tono claro por defecto) */
+    --bg: var(--c-ivory);
+    --surface: var(--c-white);
+    --fg: var(--c-charcoal);
+    --fg-muted: var(--c-ink-muted);
+    --rule: color-mix(in srgb, var(--c-warm-gray) 70%, transparent);
+    --rule-strong: var(--c-charcoal);
+    --accent: var(--c-orange); /* gráfico: subrayado, punto, filetes */
+    --accent-text: var(--c-orange-deep); /* texto en naranja */
+    --btn-bg: var(--c-charcoal);
+    --btn-fg: var(--c-ivory);
+    --focus: var(--c-orange-deep);
+    --selection: color-mix(in srgb, var(--c-orange) 28%, transparent);
+
+    /* Tipografía */
+    --font-display: 'Playfair Display Variable', 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* Escala fluida (≈ 375 px → 1440 px) */
+    --step-display: clamp(2.5rem, 1.2rem + 6.4vw, 7rem);
+    --step-h2: clamp(2rem, 1.1rem + 3.9vw, 4.5rem);
+    --step-h3: clamp(1.5rem, 1.25rem + 0.9vw, 2rem);
+    --step-figure: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+    --step-price: clamp(4rem, 3rem + 3vw, 6rem);
+    --step-lead: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+    --step-body: clamp(1.0625rem, 1.02rem + 0.18vw, 1.125rem);
+    --step-small: 0.9375rem;
+    --step-label: clamp(0.75rem, 0.73rem + 0.08vw, 0.8125rem);
+
+    --leading-display: 0.98;
+    --leading-heading: 1.08;
+    --leading-body: 1.6;
+    --tracking-display: -0.02em;
+    --tracking-label: 0.14em;
+    --measure: 62ch;
+
+    /* Retícula */
+    --cols: 4;
+    --gutter: 1rem;
+    --margin: 1.25rem;
+    --content-max: 82rem;
+    --header-h: 3.5rem;
+
+    /* Espaciado (múltiplos de 8) */
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2rem;
+    --space-5: 3rem;
+    --space-6: 4rem;
+    --space-7: 6rem;
+    --space-8: 8rem;
+    --section-y: clamp(5rem, 3.5rem + 6vw, 10rem);
+
+    /* Movimiento */
+    --ease-out: cubic-bezier(0.2, 0.7, 0.1, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-fast: 180ms;
+    --dur: 320ms;
+    --dur-slow: 800ms;
+
+    --radius: 2px;
+    --hairline: 1px;
+  }
+
+  @media (min-width: 48rem) {
+    :root {
+      --cols: 8;
+      --gutter: 1.25rem;
+      --margin: 2.5rem;
+      --header-h: 4rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    :root {
+      --cols: 12;
+      --gutter: 1.5rem;
+      --margin: clamp(2.5rem, 5vw, 5rem);
+      --header-h: 4.5rem;
+    }
+  }
+
+  /* Tono oscuro por sección: <section data-tone="dark"> */
+  [data-tone='dark'] {
+    --bg: var(--c-charcoal);
+    --surface: var(--c-charcoal-raised);
+    --fg: var(--c-ivory);
+    --fg-muted: var(--c-warm-gray); /* 7.6:1 sobre carbón */
+    --rule: color-mix(in srgb, var(--c-warm-gray) 35%, transparent);
+    --rule-strong: var(--c-ivory);
+    --accent-text: var(--c-orange); /* 4.7:1 sobre carbón */
+    --btn-bg: var(--c-ivory);
+    --btn-fg: var(--c-charcoal);
+    --focus: var(--c-orange);
+  }
+
+  [data-tone='white'] {
+    --bg: var(--c-white);
+  }
+}

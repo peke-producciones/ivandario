@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import MobileCta from '@/components/MobileCta.astro';
+import Hero from '@/components/sections/Hero.astro';
+---
+
+<BaseLayout>
+  <Header isHome />
+  <main id="contenido-principal">
+    <Hero />
+    <!-- Fase 3: Motivos · Sobre mí · Enfoque · Servicios · Contenido · FAQ · Contacto -->
+  </main>
+  <MobileCta />
+</BaseLayout>

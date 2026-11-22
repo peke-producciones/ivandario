@@ -1,0 +1,29 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   RETÍCULA EDITORIAL
+   4 columnas (móvil) · 8 (tableta) · 12 (escritorio).
+   Líneas con nombre: full-start | content-start | col-start N … | content-end | full-end
+   Ejemplos:
+     grid-column: content;                     → ancho de contenido
+     grid-column: col-start 1 / col-end 7;     → columnas 1 a 7
+     grid-column: col-start 9 / full;          → de la columna 9 hasta el borde
+   ───────────────────────────────────────────────────────────────────────────── */
+@layer layout {
+  .grid {
+    --col-w: calc((var(--content-max) - (var(--cols) - 1) * var(--gutter)) / var(--cols));
+    display: grid;
+    grid-template-columns:
+      [full-start] minmax(calc(var(--margin) - var(--gutter)), 1fr)
+      [content-start] repeat(var(--cols), [col-start] minmax(0, var(--col-w)) [col-end])
+      [content-end] minmax(calc(var(--margin) - var(--gutter)), 1fr)
+      [full-end];
+    column-gap: var(--gutter);
+  }
+
+  .grid > * {
+    grid-column: content;
+  }
+
+  .section {
+    padding-block: var(--section-y);
+  }
+}

@@ -1,0 +1,432 @@
+---
+/**
+ * HERO — composición asimétrica.
+ * Con retrato: titular en columnas 1–8, retrato a sangre desde la 9.
+ * Sin retrato (producción, mientras no haya fotografía): variante tipográfica,
+ * el titular se expande y el concepto de marca ocupa el margen derecho.
+ */
+import Button from '@/components/ui/Button.astro';
+import Folio from '@/components/ui/Folio.astro';
+import Mark from '@/components/ui/Mark.astro';
+import Photo from '@/components/ui/Photo.astro';
+import { site, facts } from '@/config/site';
+import { hasPhotoSlot } from '@/lib/photos';
+import { sectionHref } from '@/lib/url';
+
+const withPhoto = hasPhotoSlot(site.photos.hero);
+const { inPerson } = site.modalities;
+---
+
+<section
+  class:list={['hero', withPhoto ? 'hero--photo' : 'hero--type']}
+  id="inicio"
+  aria-labelledby="hero-title"
+  data-hero
+>
+  <div class="hero__grid grid">
+    <Folio class="hero__folio">Psicoterapia en Monterrey y en línea</Folio>
+
+    <div class="hero__headline">
+      <h1 id="hero-title" class="hero__title">
+        <span class="line" style="--i: 0"><span>No siempre </span></span>
+        <span class="line" style="--i: 1"><span>necesitas tener </span></span>
+        <span class="line" style="--i: 2"><span>todo claro para </span></span>
+        <span class="line" style="--i: 3"
+          ><span><Mark trigger="load" delay={760}>comenzar</Mark><span class="hero__dot">.</span></span></span
+        >
+      </h1>
+    </div>
+
+    <div class="hero__body">
+      <p class="hero__lead lead">
+        A veces, el primer paso es encontrar un espacio donde puedas hablar, comprender lo que estás viviendo y explorar
+        nuevas posibilidades.
+      </p>
+      <div class="hero__actions" data-hero-actions>
+        <Button href={site.links.doctoralia} external track="doctoralia">Agendar una consulta</Button>
+        <Button href={sectionHref('sobre-mi')} variant="text">Conoce mi trabajo</Button>
+      </div>
+    </div>
+
+    {
+      withPhoto ? (
+        <div class="hero__media">
+          <Photo
+            photo={site.photos.hero}
+            alt={`Retrato de ${site.person.displayName}, psicoterapeuta`}
+            ratio="4 / 5"
+            label="Hero · retrato 4:5"
+            sizes="(min-width: 64rem) 40vw, (min-width: 48rem) 45vw, 85vw"
+            priority
+          />
+        </div>
+      ) : (
+        <p class="hero__concept" aria-label="Concepto">
+          <span class="hero__concept-rule" aria-hidden="true" />
+          {site.concept}
+        </p>
+      )
+    }
+
+    <dl class="facts">
+      <div class="fact">
+        <dt class="label">Atención</dt>
+        <dd>{facts.audience}</dd>
+      </div>
+      <div class="fact">
+        <dt class="label">Modalidad</dt>
+        <dd>
+          Presencial y en línea
+          <span class="fact__detail">{inPerson.area}</span>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt class="label">Duración</dt>
+        <dd>
+          {facts.duration}
+          <span class="fact__detail">por sesión</span>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt class="label">Precio</dt>
+        <dd>
+          {facts.price}
+          <span class="fact__detail">por sesión</span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(1.75rem, 1rem + 3vw, 3.5rem) clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    overflow-x: clip;
+  }
+
+  .hero__grid {
+    row-gap: var(--space-3);
+    align-items: start;
+  }
+
+  /* ── Titular ────────────────────────────────────────────────────────────── */
+  .hero__headline {
+    container-type: inline-size;
+  }
+
+  .hero__title {
+    /* El titular se ajusta a su columna: las 4 líneas nunca se rompen. */
+    font-size: min(var(--step-display), 12.2cqi);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    text-wrap: initial;
+  }
+
+  .line {
+    display: block;
+    /* margen para ascendentes, descendentes y el subrayado dentro del recorte */
+    padding-block: 0.08em 0.16em;
+    margin-block: -0.08em -0.16em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .line > span {
+    display: block;
+  }
+
+  .hero__dot {
+    color: var(--accent);
+  }
+
+  /* ── Cuerpo ─────────────────────────────────────────────────────────────── */
+  .hero__body {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-1);
+  }
+
+  .hero__lead {
+    max-width: 36ch;
+    color: var(--fg);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  /* ── Concepto (variante tipográfica) ───────────────────────────────────── */
+  .hero__concept {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    max-width: 24ch;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-figure);
+    line-height: 1.3;
+    color: var(--fg-muted);
+  }
+
+  .hero__concept-rule {
+    flex: none;
+    inline-size: 2rem;
+    block-size: 2px;
+    background: var(--accent);
+    transform: translateY(-0.3em);
+  }
+
+  /* ── Datos ──────────────────────────────────────────────────────────────── */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3) var(--gutter);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: var(--hairline) solid var(--rule-strong);
+  }
+
+  .fact {
+    display: grid;
+    align-content: start;
+    gap: 0.4rem;
+  }
+
+  .fact dt {
+    color: var(--fg-muted);
+  }
+
+  .fact dd {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-figure);
+    line-height: 1.2;
+    font-variant-numeric: lining-nums;
+  }
+
+  .fact__detail {
+    font-family: var(--font-sans);
+    font-size: var(--step-small);
+    line-height: 1.4;
+    color: var(--fg-muted);
+  }
+
+  /* ── Retrato ───────────────────────────────────────────────────────────── */
+  .hero__media {
+    grid-column: col-start 2 / full;
+    margin-top: var(--space-3);
+  }
+
+  /* ── Móvil: orden de lectura = orden de decisión ───────────────────────── */
+  @media (max-width: 47.99rem) {
+    .hero__media {
+      order: 1; /* después de los datos: el retrato asoma al final del primer pliegue */
+    }
+
+    .hero__concept {
+      margin-top: var(--space-2);
+    }
+  }
+
+  /* ── Tableta ───────────────────────────────────────────────────────────── */
+  @media (min-width: 48rem) {
+    .hero__grid {
+      grid-template-rows: auto auto auto 1fr auto;
+      row-gap: var(--space-4);
+    }
+
+    .hero--photo :global(.hero__folio),
+    .hero--photo .hero__headline,
+    .hero--photo .hero__body {
+      grid-column: col-start 1 / col-end 5;
+    }
+
+    .hero--photo :global(.hero__folio) {
+      grid-row: 1;
+    }
+
+    .hero--photo .hero__headline {
+      grid-row: 2;
+    }
+
+    .hero--photo .hero__body {
+      grid-row: 3;
+    }
+
+    .hero__media {
+      grid-column: col-start 6 / full;
+      grid-row: 1 / 5;
+      margin-top: 0;
+    }
+
+    .hero--type .hero__headline {
+      grid-column: col-start 1 / col-end 8;
+    }
+
+    .hero--type .hero__body {
+      grid-column: col-start 1 / col-end 5;
+    }
+
+    .hero--type .hero__concept {
+      grid-column: col-start 6 / content-end;
+      grid-row: 3;
+      align-self: end;
+    }
+
+    .facts {
+      grid-column: content;
+      grid-row: 5;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: var(--space-5);
+    }
+
+    .fact + .fact {
+      padding-left: var(--gutter);
+      border-left: var(--hairline) solid var(--rule);
+    }
+  }
+
+  /* ── Escritorio ────────────────────────────────────────────────────────── */
+  @media (min-width: 64rem) {
+    .hero {
+      padding-block: var(--space-4) var(--space-4);
+      display: flex;
+      min-height: calc(100svh - var(--header-h));
+      max-height: 68rem;
+    }
+
+    .hero__grid {
+      flex: 1;
+      row-gap: var(--space-3);
+    }
+
+    /* En escritorio el titular también respeta la altura de la ventana:
+       la franja de datos (precio, duración, modalidad) queda visible sin scroll. */
+    .hero__title {
+      font-size: max(3.25rem, min(var(--step-display), 12.2cqi, calc((100svh - var(--header-h) - var(--hero-chrome)) / 4.15)));
+    }
+
+    .hero {
+      /* alto de todo lo que no es titular: folio, cuerpo, datos y márgenes */
+      --hero-chrome: 26.5rem;
+    }
+
+    /* Entrada y botones lado a lado: lectura en Z, menos altura */
+    .hero__body {
+      grid-template-columns: minmax(0, 40ch) auto;
+      align-items: end;
+      column-gap: var(--space-5);
+      margin-top: 0;
+    }
+
+    .hero__actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
+    }
+
+    .hero--photo :global(.hero__folio) {
+      grid-column: col-start 1 / col-end 7;
+    }
+
+    .hero--photo .hero__headline {
+      grid-column: col-start 1 / col-end 8;
+    }
+
+    .hero--photo .hero__body {
+      grid-column: col-start 1 / col-end 8;
+    }
+
+    .hero__media {
+      grid-column: col-start 9 / full;
+      grid-row: 1 / 5;
+      align-self: stretch;
+      display: grid;
+    }
+
+    .hero__media :global(.photo) {
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 30rem;
+    }
+
+    .hero--type .hero__headline {
+      grid-column: col-start 1 / col-end 10;
+    }
+
+    .hero--type .hero__body {
+      grid-column: col-start 1 / col-end 8;
+    }
+
+    .hero--type .hero__concept {
+      grid-column: col-start 9 / content-end;
+      justify-self: end;
+    }
+
+    .facts {
+      margin-top: 0;
+    }
+  }
+
+  /* ── Movimiento ────────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: no-preference) {
+    .line > span {
+      animation: line-rise 900ms var(--ease-out) both;
+      animation-delay: calc(80ms + var(--i) * 85ms);
+    }
+
+    :global(.hero__folio),
+    .hero__body,
+    .hero__concept,
+    .facts {
+      animation: fade-up 900ms var(--ease-out) both;
+    }
+
+    :global(.hero__folio) {
+      animation-delay: 0ms;
+    }
+
+    .hero__body {
+      animation-delay: 420ms;
+    }
+
+    .hero__concept {
+      animation-delay: 620ms;
+    }
+
+    .facts {
+      animation-delay: 560ms;
+    }
+
+    .hero__media :global(.photo) {
+      animation: photo-in 1200ms var(--ease-out) 150ms both;
+    }
+  }
+
+  @keyframes line-rise {
+    from {
+      transform: translateY(108%);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+  }
+
+  @keyframes photo-in {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+</style>

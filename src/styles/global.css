@@ -1,0 +1,9 @@
+/* Orden de cascada. Los estilos de cada componente (.astro) quedan fuera de
+   capas y por eso prevalecen sobre estas bases. */
+@layer reset, tokens, base, layout, utilities;
+
+@import './reset.css';
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './utilities.css';

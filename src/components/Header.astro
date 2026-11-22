@@ -1,0 +1,405 @@
+---
+import Button from '@/components/ui/Button.astro';
+import { navigation } from '@/config/navigation';
+import { site, facts } from '@/config/site';
+import { url, sectionHref } from '@/lib/url';
+
+interface Props {
+  isHome?: boolean;
+}
+const { isHome = true } = Astro.props;
+const { displayName, profession } = site.person;
+---
+
+<header class="header" data-header>
+  <div class="header__inner">
+    <a class="brand" href={url('/')} aria-label={`${displayName}, ${profession.toLowerCase()}. Ir al inicio`}>
+      <span class="brand__name">{displayName}</span>
+      <span class="brand__dot" aria-hidden="true"></span>
+      <span class="brand__role">{profession}</span>
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      <ul role="list" class="nav__list">
+        {
+          navigation.map((item) => (
+            <li>
+              <a class="nav__link" href={sectionHref(item.id, isHome)} data-spy={item.id}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <Button href={site.links.doctoralia} external track="doctoralia" size="compact" class="header__cta">
+        Agendar consulta
+      </Button>
+      <button
+        class="menu-toggle label"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="menu"
+        aria-expanded="false"
+        data-menu-open
+      >
+        <span>Menú</span>
+        <span class="menu-toggle__bars" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog id="menu" class="menu" data-tone="dark" aria-label="Menú" data-menu>
+  <div class="menu__inner">
+    <div class="menu__top">
+      <span class="brand brand--menu" aria-hidden="true">
+        <span class="brand__name">{displayName}</span>
+        <span class="brand__dot"></span>
+        <span class="brand__role">{profession}</span>
+      </span>
+      <button class="menu-toggle label" type="button" data-menu-close>
+        <span>Cerrar</span>
+        <span class="menu-toggle__x" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <nav class="menu__nav" aria-label="Secciones">
+      <ol role="list">
+        {
+          navigation.map((item, i) => (
+            <li style={`--i: ${i}`}>
+              <a href={sectionHref(item.id, isHome)} data-menu-link>
+                <span class="menu__n" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="menu__bottom">
+      <Button href={site.links.doctoralia} external track="doctoralia" block>Agendar una consulta</Button>
+      <p class="menu__facts label">
+        {facts.duration} · {facts.price} por sesión
+      </p>
+      <ul role="list" class="menu__links">
+        <li>
+          <Button href={site.links.doctoralia} variant="text" external track="doctoralia">Doctoralia</Button>
+        </li>
+        <li>
+          <Button href={site.links.tiktok.url} variant="text" external track="tiktok">TikTok</Button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--c-ivory) 92%, transparent);
+    -webkit-backdrop-filter: saturate(1.2) blur(12px);
+    backdrop-filter: saturate(1.2) blur(12px);
+    border-bottom: var(--hairline) solid transparent;
+    transition: border-color var(--dur) var(--ease-out);
+  }
+
+  :global([data-scrolled]) .header {
+    border-bottom-color: var(--rule);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    max-width: calc(var(--content-max) + 2 * var(--margin));
+    min-height: var(--header-h);
+    margin-inline: auto;
+    padding-inline: var(--margin);
+  }
+
+  /* Logotipo tipográfico */
+  .brand {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .brand__name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+  }
+
+  .brand__dot {
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    background: var(--c-orange);
+  }
+
+  .brand__role {
+    grid-column: 1 / -1;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 64rem) {
+    .brand {
+      grid-template-columns: auto auto auto;
+    }
+
+    .brand__role {
+      grid-column: auto;
+      font-size: 0.6875rem;
+    }
+  }
+
+  /* Navegación de escritorio */
+  .nav {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .nav {
+      display: block;
+      margin-inline: auto;
+    }
+  }
+
+  .nav__list {
+    display: flex;
+    gap: clamp(1rem, 2.2vw, 2.25rem);
+  }
+
+  .nav__link {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.75rem;
+    font-size: var(--step-label);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--fg-muted);
+    transition: color var(--dur-fast) ease;
+  }
+
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.45rem;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .nav__link:hover,
+  .nav__link[aria-current] {
+    color: var(--fg);
+  }
+
+  .nav__link:hover::after,
+  .nav__link[aria-current]::after {
+    transform: scaleX(1);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* En móvil el CTA vive en la barra inferior (zona del pulgar) */
+  .header__actions :global(.header__cta) {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .header__actions :global(.header__cta) {
+      display: inline-flex;
+    }
+  }
+
+  /* Botón Menú / Cerrar */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+    color: var(--fg);
+  }
+
+  @media (min-width: 64rem) {
+    .header .menu-toggle {
+      display: none;
+    }
+  }
+
+  .menu-toggle__bars,
+  .menu-toggle__x {
+    position: relative;
+    inline-size: 1.25rem;
+    block-size: 0.5rem;
+  }
+
+  .menu-toggle__bars::before,
+  .menu-toggle__bars::after,
+  .menu-toggle__x::before,
+  .menu-toggle__x::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: currentColor;
+  }
+
+  .menu-toggle__bars::before {
+    top: 0;
+  }
+
+  .menu-toggle__bars::after {
+    bottom: 0;
+  }
+
+  .menu-toggle__x::before,
+  .menu-toggle__x::after {
+    top: 50%;
+  }
+
+  .menu-toggle__x::before {
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle__x::after {
+    transform: rotate(-45deg);
+  }
+
+  /* Menú móvil (diálogo modal: foco atrapado y Esc nativos) */
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    overscroll-behavior: contain;
+  }
+
+  .menu::backdrop {
+    background: transparent;
+  }
+
+  .menu__inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100%;
+    padding: 0 var(--margin) calc(var(--space-4) + env(safe-area-inset-bottom));
+  }
+
+  .menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--header-h);
+  }
+
+  .menu__nav {
+    align-self: center;
+    padding-block: var(--space-5);
+  }
+
+  .menu__nav ol {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .menu__nav a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-block: 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 9vw, 3.25rem);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-display);
+    text-decoration: none;
+  }
+
+  .menu__n {
+    font-family: var(--font-sans);
+    font-size: var(--step-label);
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    color: var(--accent-text);
+    min-inline-size: 1.75rem;
+  }
+
+  .menu__bottom {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .menu__facts {
+    color: var(--fg-muted);
+    text-align: center;
+  }
+
+  .menu__links {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] {
+      animation: menu-in 420ms var(--ease-out);
+    }
+
+    .menu[open] .menu__nav li {
+      animation: menu-item-in 520ms var(--ease-out) both;
+      animation-delay: calc(120ms + var(--i) * 50ms);
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.75rem);
+    }
+  }
+
+  @keyframes menu-item-in {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
+
+  :global(html:has(dialog[open])) {
+    overflow: hidden;
+  }
+</style>
