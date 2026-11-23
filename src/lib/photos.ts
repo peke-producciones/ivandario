@@ -1,14 +1,17 @@
 import type { ImageMetadata } from 'astro';
+import { site } from '@/config/site';
 import { isConfirmed, type Field } from './pending';
+
+/** ¿Se muestran marcadores de fotos pendientes? (desarrollo o vista previa) */
+export const showPhotoPlaceholders = (): boolean =>
+  (import.meta.env.DEV || site.preview.showPending) && !process.env.SIN_FOTOS;
 
 /**
  * ¿Debe reservarse el espacio de una fotografía?
- * - Producción: solo si la foto está confirmada.
- * - Desarrollo: siempre (se ve el marcador provisional), salvo con
- *   `SIN_FOTOS=1 npm run dev`, que muestra el sitio tal como se publicaría hoy.
+ * - Foto confirmada: siempre.
+ * - Pendiente: solo en desarrollo o con la vista previa activa (se ve el marcador).
+ *   `SIN_FOTOS=1 npm run dev` muestra la variante tipográfica de lanzamiento.
  */
 export function hasPhotoSlot(field: Field<ImageMetadata>): boolean {
-  if (isConfirmed(field)) return true;
-  if (!import.meta.env.DEV) return false;
-  return !process.env.SIN_FOTOS;
+  return isConfirmed(field) || showPhotoPlaceholders();
 }

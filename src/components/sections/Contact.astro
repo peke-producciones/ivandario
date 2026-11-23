@@ -1,0 +1,104 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Mark from '@/components/ui/Mark.astro';
+import Pending from '@/components/ui/Pending.astro';
+import Section from '@/components/ui/Section.astro';
+import ContactForm from '@/components/ContactForm.astro';
+import { site, facts } from '@/config/site';
+import { valueOf } from '@/lib/pending';
+
+const whatsapp = valueOf(site.contact.whatsapp);
+const email = valueOf(site.contact.email);
+const hasForm = Boolean(valueOf(site.contact.formEndpoint)) || site.preview.showPending;
+---
+
+<Section id="contacto" number="07" label="Contacto" class:list={['contact', hasForm ? 'contact--form' : 'contact--solo']}>
+  <h2 id="contacto-title" class="contact__title">
+    Podemos comenzar con una <Mark>conversación</Mark><span class="contact__dot">.</span>
+  </h2>
+
+  <div class="contact__main">
+    <p class="contact__text lead">
+      Si estás considerando comenzar un proceso terapéutico o tienes dudas sobre cómo trabajo, puedes escribirme. Con
+      gusto te proporcionaré información sobre las consultas y los pasos para agendar.
+    </p>
+
+    <div class="contact__actions">
+      <Button href={site.links.doctoralia} external track="doctoralia">Agendar en Doctoralia</Button>
+      {
+        whatsapp ? (
+          <Button href={`https://wa.me/${whatsapp}`} variant="text" external track="whatsapp">
+            Escribir por WhatsApp
+          </Button>
+        ) : (
+          <Pending label="Botón «Escribir por WhatsApp»: número profesional" />
+        )
+      }
+      {email && <Button href={`mailto:${email}`} variant="text">{email}</Button>}
+    </div>
+
+    <p class="contact__facts label">
+      {facts.duration} · {facts.price} por sesión · Presencial en Monterrey y en línea
+    </p>
+  </div>
+
+  {
+    hasForm && (
+      <div class="contact__form">
+        <ContactForm />
+      </div>
+    )
+  }
+</Section>
+
+<style>
+  .contact__title {
+    font-size: clamp(2.5rem, 1.3rem + 5.2vw, 6.5rem);
+    line-height: 1;
+    max-width: 14ch;
+  }
+
+  .contact__dot {
+    color: var(--accent);
+  }
+
+  .contact__main {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+  }
+
+  .contact__text {
+    max-width: 42ch;
+  }
+
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .contact__facts {
+    color: var(--fg-muted);
+  }
+
+  .contact__form {
+    padding-top: var(--space-2);
+  }
+
+  @media (min-width: 64rem) {
+    .contact__title {
+      grid-column: col-start 3 / content-end !important;
+    }
+
+    :global(.contact--form) .contact__main {
+      grid-column: col-start 3 / col-end 8;
+    }
+
+    :global(.contact--form) .contact__form {
+      grid-column: col-start 9 / content-end;
+      padding-top: 0;
+    }
+  }
+</style>

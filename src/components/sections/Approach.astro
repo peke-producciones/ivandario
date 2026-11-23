@@ -1,0 +1,178 @@
+---
+import Mark from '@/components/ui/Mark.astro';
+import Pending from '@/components/ui/Pending.astro';
+import Section from '@/components/ui/Section.astro';
+import { approachSteps } from '@/content/approach';
+import { site } from '@/config/site';
+import { valueOf } from '@/lib/pending';
+
+const detailed = valueOf(site.approach.detailed);
+---
+
+<Section id="enfoque" number="03" label="Mi enfoque">
+  <div class="approach">
+    <div class="approach__intro">
+      <h2 id="enfoque-title" class="approach__title">
+        <span class="approach__title-muted">No se trata de darte respuestas prefabricadas.</span>
+        Se trata de construir un proceso que tenga <Mark>sentido</Mark> para ti.
+      </h2>
+      <p class="approach__text">
+        Mi abordaje es integrativo: considero diferentes perspectivas y herramientas psicológicas de acuerdo con las
+        necesidades, historia y objetivos de cada persona.
+      </p>
+      {detailed && <p class="approach__text">{detailed}</p>}
+      {!detailed && <Pending label="Descripción detallada del enfoque terapéutico" />}
+    </div>
+
+    <div class="approach__steps-wrap">
+      <ol role="list" class="steps">
+        {
+          approachSteps.map((s, i) => (
+            <li class="step" data-reveal>
+              <span class="step__n label" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 class="step__verb">{s.verb}</h3>
+              <p class="step__text">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="approach__note">
+        Estas cuatro palabras describen una forma de acompañar, no un método cerrado ni una promesa de resultados. Cada
+        proceso encuentra su propio ritmo.
+      </p>
+    </div>
+  </div>
+</Section>
+
+<style>
+  .approach {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .approach__intro {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+
+  .approach__title {
+    font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.5rem);
+    line-height: 1.1;
+    max-width: 18ch;
+  }
+
+  .approach__title-muted {
+    display: block;
+    color: var(--fg-muted);
+    margin-bottom: 0.35em;
+  }
+
+  .approach__text {
+    max-width: 44ch;
+    font-size: var(--step-lead);
+    line-height: 1.5;
+  }
+
+  /* Línea de proceso: gris de base, naranja que avanza con la lectura */
+  .steps {
+    position: relative;
+    display: grid;
+    gap: var(--space-5);
+    padding-left: var(--space-4);
+    view-timeline: --steps block;
+  }
+
+  .steps::before,
+  .steps::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+  }
+
+  .steps::before {
+    background: var(--rule);
+  }
+
+  .steps::after {
+    background: var(--accent);
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .steps::after {
+        animation: steps-progress linear both;
+        animation-timeline: --steps;
+        animation-range: entry 60% cover 65%;
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .steps::after {
+      transform: none;
+    }
+  }
+
+  @keyframes steps-progress {
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .step {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .step__n {
+    color: var(--accent-text);
+  }
+
+  .step__verb {
+    font-style: italic;
+    font-size: var(--step-h2);
+    line-height: 1;
+  }
+
+  .step__text {
+    max-width: 32ch;
+    color: var(--fg-muted);
+    font-size: var(--step-lead);
+    line-height: 1.45;
+  }
+
+  .approach__note {
+    margin-top: var(--space-5);
+    padding-left: var(--space-4);
+    max-width: 46ch;
+    font-size: var(--step-small);
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 64rem) {
+    .approach {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--gutter);
+      column-gap: calc(var(--gutter) * 3);
+    }
+
+    /* El planteamiento acompaña mientras se leen los cuatro pasos */
+    .approach__intro {
+      position: sticky;
+      top: calc(var(--header-h) + var(--space-5));
+    }
+
+    .steps {
+      gap: var(--space-7);
+      padding-top: var(--space-2);
+    }
+  }
+</style>

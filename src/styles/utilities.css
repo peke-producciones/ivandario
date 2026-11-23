@@ -57,3 +57,12 @@
     }
   }
 }
+
+@layer utilities {
+  /* Titular de sección */
+  .section-title {
+    font-size: var(--step-h2);
+    line-height: var(--leading-heading);
+    max-width: 20ch;
+  }
+}

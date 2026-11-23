@@ -1,0 +1,207 @@
+---
+/**
+ * Contenido / TikTok. No carga el feed completo ni scripts de terceros al abrir
+ * la página: cada video se carga solo cuando la persona da clic (privacidad y
+ * velocidad). Sin videos configurados, la sección invita al perfil.
+ */
+import { Image } from 'astro:assets';
+import Button from '@/components/ui/Button.astro';
+import Mark from '@/components/ui/Mark.astro';
+import Pending from '@/components/ui/Pending.astro';
+import Section from '@/components/ui/Section.astro';
+import { site } from '@/config/site';
+import { videos, videoId } from '@/content/videos';
+
+const { tiktok } = site.links;
+const list = videos.slice(0, 6).filter((v) => videoId(v.url));
+---
+
+<Section id="contenido" number="05" label="Contenido" tone="dark">
+  <h2 id="contenido-title" class="section-title">Psicología para entender lo que <Mark>vivimos</Mark>.</h2>
+  <p class="content__text lead">
+    Reflexiones sobre psicología, relaciones, emociones y situaciones de nuestra vida cotidiana.
+  </p>
+
+  {
+    list.length > 0 && (
+      <ul role="list" class="videos">
+        {list.map((v) => (
+          <li class="video" data-reveal>
+            <div class="video__frame" data-video={videoId(v.url)}>
+              {v.cover && (
+                <Image src={v.cover} alt="" widths={[240, 360, 480]} sizes="(min-width: 64rem) 22vw, 70vw" class="video__cover" />
+              )}
+              <button class="video__play" type="button" aria-label={`Reproducir: ${v.title}`} data-track="tiktok">
+                <span class="video__icon" aria-hidden="true" />
+              </button>
+            </div>
+            <p class="video__title">{v.title}</p>
+            <a class="video__link label" href={v.url} target="_blank" rel="noopener" data-track="tiktok">
+              Ver en TikTok <span aria-hidden="true">↗</span>
+              <span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {list.length === 0 && <Pending label="Entre 3 y 6 videos destacados de TikTok (enlaces)" />}
+
+  <a class="handle" href={tiktok.url} target="_blank" rel="noopener" data-track="tiktok" data-reveal>
+    <span class="label handle__kicker">Sígueme en TikTok</span>
+    <span class="handle__name">{tiktok.handle}<span class="handle__arrow" aria-hidden="true">↗</span></span>
+    <span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+  </a>
+
+  <div class="content__cta">
+    <Button href={tiktok.url} external track="tiktok">Ver perfil en TikTok</Button>
+  </div>
+</Section>
+
+<script>
+  // Carga el reproductor oficial de TikTok solo al dar clic.
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((frame) => {
+    frame.querySelector('button')?.addEventListener('click', () => {
+      const id = frame.dataset.video;
+      if (!id) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.tiktok.com/player/v1/${id}?autoplay=1&rel=0`;
+      iframe.title = 'Video de TikTok';
+      iframe.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+      iframe.loading = 'lazy';
+      iframe.className = 'video__iframe';
+      frame.replaceChildren(iframe);
+    });
+  });
+</script>
+
+<style>
+  .content__text {
+    max-width: 40ch;
+    color: var(--fg-muted);
+  }
+
+  .videos {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(70vw, 18rem);
+    gap: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-2);
+  }
+
+  .video {
+    display: grid;
+    gap: var(--space-1);
+    scroll-snap-align: start;
+  }
+
+  .video__frame {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .video__frame :global(.video__cover),
+  .video__frame :global(.video__iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 0;
+  }
+
+  .video__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .video__icon {
+    inline-size: 4rem;
+    block-size: 4rem;
+    border-radius: 50%;
+    background: var(--c-orange);
+    clip-path: circle(50%);
+    position: relative;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .video__icon::after {
+    content: '';
+    position: absolute;
+    left: 54%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-left: 0.9rem solid var(--c-charcoal);
+    border-block: 0.55rem solid transparent;
+  }
+
+  .video__play:hover .video__icon {
+    transform: scale(1.08);
+  }
+
+  .video__title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  .video__link {
+    text-decoration: none;
+    color: var(--accent-text);
+  }
+
+  .handle {
+    display: grid;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-block: var(--hairline) solid var(--rule);
+    text-decoration: none;
+  }
+
+  .handle__kicker {
+    color: var(--fg-muted);
+  }
+
+  .handle__name {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.15em;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(2.5rem, 1rem + 7.5vw, 8.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    overflow-wrap: anywhere;
+  }
+
+  .handle__arrow {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-size: 0.35em;
+    color: var(--accent);
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .handle:hover .handle__arrow {
+    transform: translate(0.1em, -0.1em);
+  }
+
+  @media (min-width: 64rem) {
+    .content__text {
+      grid-column: col-start 3 / col-end 8;
+    }
+
+    .videos {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: visible;
+    }
+  }
+</style>

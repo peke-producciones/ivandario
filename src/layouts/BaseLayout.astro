@@ -36,6 +36,7 @@ const indexable = site.seo.indexable && !noindex;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content={indexable ? 'index, follow' : 'noindex, nofollow'} />
+    {site.preview.showPending && <meta name="x-preview" content="pending-visible" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={site.seo.locale} />

@@ -1,0 +1,53 @@
+---
+/**
+ * Contenedor de sección editorial.
+ * - Escritorio: el folio («02 — Sobre mí») vive en la columna de margen (1–2) y
+ *   el contenido arranca en la columna 3. Cada sección puede reubicar sus hijos.
+ * - Móvil y tableta: el folio va sobre el titular.
+ * El titular de cada sección debe llevar id={`${id}-title`}.
+ */
+import Folio from '@/components/ui/Folio.astro';
+
+interface Props {
+  id: string;
+  number: string;
+  label: string;
+  tone?: 'light' | 'dark' | 'white';
+  class?: string;
+}
+const { id, number, label, tone = 'light', class: className } = Astro.props;
+---
+
+<section id={id} class:list={['section', className]} data-tone={tone} aria-labelledby={`${id}-title`}>
+  <div class="grid section__grid">
+    <Folio number={number} class="section__folio">{label}</Folio>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    padding-block: var(--section-y);
+    overflow-x: clip;
+  }
+
+  .section__grid {
+    row-gap: var(--space-4);
+    align-items: start;
+  }
+
+  @media (min-width: 64rem) {
+    .section__grid {
+      row-gap: var(--space-5);
+    }
+
+    .section__grid > :global(*) {
+      grid-column: col-start 3 / content-end;
+    }
+
+    .section__grid > :global(.section__folio) {
+      grid-column: col-start 1 / col-end 2;
+      padding-top: 0.75rem;
+    }
+  }
+</style>

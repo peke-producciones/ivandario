@@ -92,25 +92,33 @@ export function initMobileCta(): void {
   const bar = document.querySelector<HTMLElement>('[data-mobile-cta]');
   const hero = document.querySelector('[data-hero-actions]') ?? document.querySelector('[data-hero]');
   if (!bar) return;
-  if (!hero) {
-    bar.setAttribute('data-visible', '');
-    return;
-  }
-  let heroVisible = true;
+  let heroVisible = Boolean(hero);
   let contactVisible = false;
   const update = () => bar.toggleAttribute('data-visible', !heroVisible && !contactVisible);
 
-  new IntersectionObserver(([entry]) => {
-    // Solo cuenta como «fuera» si el usuario ya pasó los CTA (no si están debajo).
-    heroVisible = entry.isIntersecting || entry.boundingClientRect.top > 0;
-    update();
-  }).observe(hero);
-
-  const contact = document.getElementById('contacto');
-  if (contact) {
+  if (hero) {
     new IntersectionObserver(([entry]) => {
-      contactVisible = entry.isIntersecting;
+      // Solo cuenta como «fuera» si el usuario ya pasó los CTA (no si están debajo).
+      heroVisible = entry.isIntersecting || entry.boundingClientRect.top > 0;
       update();
-    }).observe(contact);
+    }).observe(hero);
+  }
+  update();
+
+  // Se oculta donde ya hay acciones de contacto a la vista (sección Contacto y footer).
+  const hideZones = [document.getElementById('contacto'), ...document.querySelectorAll('[data-cta-hide]')].filter(
+    (el): el is HTMLElement => Boolean(el),
+  );
+  const inView = new Set<Element>();
+  if (hideZones.length) {
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) inView.add(entry.target);
+        else inView.delete(entry.target);
+      }
+      contactVisible = inView.size > 0;
+      update();
+    });
+    hideZones.forEach((z) => io.observe(z));
   }
 }

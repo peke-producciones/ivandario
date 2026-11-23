@@ -1,0 +1,203 @@
+---
+import Button from '@/components/ui/Button.astro';
+import Mark from '@/components/ui/Mark.astro';
+import Pending from '@/components/ui/Pending.astro';
+import Section from '@/components/ui/Section.astro';
+import { site, facts } from '@/config/site';
+import { valueOf } from '@/lib/pending';
+
+const { inPerson, online } = site.modalities;
+const platform = valueOf(online.platform);
+const address = valueOf(site.location.address);
+const schedule = valueOf(site.schedule);
+const availability = valueOf(site.availability);
+const showSchedule = Boolean(schedule || availability || site.preview.showPending);
+const mxn = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+---
+
+<Section id="servicios" number="04" label="Servicios y precio">
+  <h2 id="servicios-title" class="section-title">Un espacio para comenzar tu <Mark>proceso</Mark>.</h2>
+
+  <article class="card" data-tone="white" aria-labelledby="servicio-nombre" data-reveal>
+    <div class="card__main">
+      <p class="label card__kicker">Servicio</p>
+      <h3 id="servicio-nombre" class="card__name">{site.service.name}</h3>
+
+      <dl class="spec">
+        <div class="spec__row">
+          <dt class="label">Para</dt>
+          <dd>{facts.audience}</dd>
+        </div>
+        <div class="spec__row">
+          <dt class="label">Duración</dt>
+          <dd>{site.service.durationMin} a {site.service.durationMax} minutos por sesión</dd>
+        </div>
+        <div class="spec__row">
+          <dt class="label">Modalidades</dt>
+          <dd class="modes">
+            <div class="mode">
+              <p class="mode__name">{inPerson.label}</p>
+              <p class="mode__detail">{inPerson.area}</p>
+              {address ? <p class="mode__detail">{address}</p> : <Pending label="Dirección del consultorio" />}
+            </div>
+            <div class="mode">
+              <p class="mode__name">{online.label}</p>
+              <p class="mode__detail">{online.detail}{platform && ` (${platform})`}</p>
+              {!platform && <Pending label="Plataforma de videollamada" />}
+            </div>
+          </dd>
+        </div>
+        {
+          showSchedule && (
+            <div class="spec__row">
+              <dt class="label">Horarios</dt>
+              <dd>
+                {schedule ?? <Pending label="Horarios de atención" />}
+                {availability ? <p class="mode__detail">{availability}</p> : <Pending label="Disponibilidad de citas" />}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
+
+    <div class="card__aside">
+      <p class="label card__kicker">Precio por sesión</p>
+      <p class="price">
+        <span class="price__amount">{mxn.format(site.service.price)}</span>
+        <span class="price__unit">MXN</span>
+      </p>
+      <p class="card__note">La reservación se realiza a través de Doctoralia, donde puedes elegir fecha y modalidad.</p>
+      <Button href={site.links.doctoralia} external track="doctoralia" block>Agendar en Doctoralia</Button>
+    </div>
+  </article>
+</Section>
+
+<style>
+  .card {
+    display: grid;
+    background: var(--bg);
+    color: var(--fg);
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .card__main,
+  .card__aside {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .card__aside {
+    border-top: var(--hairline) solid var(--rule);
+    background: color-mix(in srgb, var(--c-ivory) 45%, var(--c-white));
+  }
+
+  .card__kicker {
+    color: var(--fg-muted);
+  }
+
+  .card__name {
+    font-size: var(--step-h3);
+    margin-bottom: var(--space-2);
+  }
+
+  .spec {
+    display: grid;
+  }
+
+  .spec__row {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: var(--space-2);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .spec__row dt {
+    color: var(--fg-muted);
+    padding-top: 0.2rem;
+  }
+
+  .spec__row dd {
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+    justify-items: start;
+  }
+
+  .modes {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--space-3) var(--gutter) !important;
+  }
+
+  .mode {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: start;
+  }
+
+  .mode__name {
+    font-family: var(--font-display);
+    font-size: var(--step-figure);
+    line-height: 1.2;
+  }
+
+  .mode__detail {
+    color: var(--fg-muted);
+    font-size: var(--step-small);
+  }
+
+  .price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    line-height: 1;
+    font-variant-numeric: lining-nums;
+  }
+
+  .price__amount {
+    font-size: var(--step-price);
+    letter-spacing: -0.02em;
+  }
+
+  .price__unit {
+    font-family: var(--font-sans);
+    font-size: var(--step-label);
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+  }
+
+  .card__note {
+    font-size: var(--step-small);
+    color: var(--fg-muted);
+    margin-bottom: var(--space-2);
+    max-width: 32ch;
+  }
+
+  @media (min-width: 48rem) {
+    .card__main,
+    .card__aside {
+      padding: var(--space-5);
+    }
+
+    .spec__row {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      gap: var(--gutter);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .card {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    }
+
+    .card__aside {
+      border-top: 0;
+      border-left: var(--hairline) solid var(--rule);
+      position: sticky;
+      top: var(--header-h);
+    }
+  }
+</style>

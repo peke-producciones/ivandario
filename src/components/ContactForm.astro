@@ -1,0 +1,284 @@
+---
+/**
+ * Formulario de contacto con recopilación mínima (PROJECT BRAIN §4.9 y §10):
+ * nombre, medio de contacto y mensaje opcional. Nunca pide información clínica.
+ *
+ * - Con `contact.formEndpoint` confirmado: envía a ese servicio (compatible con
+ *   Formspree / Web3Forms: POST multipart con Accept: application/json).
+ * - Sin servicio configurado: en vista previa se muestra desactivado y marcado
+ *   como pendiente; en lanzamiento no se renderiza.
+ */
+import Pending from '@/components/ui/Pending.astro';
+import { site } from '@/config/site';
+import { valueOf } from '@/lib/pending';
+import { url } from '@/lib/url';
+
+const endpoint = valueOf(site.contact.formEndpoint);
+const show = Boolean(endpoint) || site.preview.showPending;
+const disabled = !endpoint;
+---
+
+{
+  show && (
+    <form
+      class="form"
+      action={endpoint}
+      method="post"
+      novalidate
+      data-contact-form
+      aria-describedby="form-privacy"
+    >
+      <fieldset disabled={disabled}>
+        <legend class="label form__legend">Escríbeme</legend>
+
+        <div class="field">
+          <label for="cf-name">Nombre</label>
+          <input id="cf-name" name="nombre" type="text" autocomplete="given-name" required maxlength="80" />
+          <p class="field__error" id="cf-name-error" data-error-for="cf-name" hidden>Escribe tu nombre.</p>
+        </div>
+
+        <div class="field">
+          <label for="cf-contact">Teléfono o correo para responderte</label>
+          <input id="cf-contact" name="contacto" type="text" autocomplete="email" required maxlength="120" inputmode="email" />
+          <p class="field__error" id="cf-contact-error" data-error-for="cf-contact" hidden>
+            Escribe un correo válido o un teléfono de 10 dígitos.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="cf-message">
+            Mensaje <span class="muted">(opcional)</span>
+          </label>
+          <textarea id="cf-message" name="mensaje" rows="4" maxlength="500" aria-describedby="cf-message-hint" />
+          <p id="cf-message-hint" class="field__hint">
+            Basta con una idea general. No es necesario compartir detalles personales: podemos hablarlo en consulta.
+          </p>
+        </div>
+
+        <div class="field field--honey" aria-hidden="true">
+          <label for="cf-website">No llenar</label>
+          <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="field field--check">
+          <input id="cf-consent" name="consentimiento" type="checkbox" required />
+          <label for="cf-consent" id="form-privacy">
+            Acepto el <a href={url('/aviso-de-privacidad/')}>aviso de privacidad</a>.
+          </label>
+          <p class="field__error" id="cf-consent-error" data-error-for="cf-consent" hidden>
+            Para enviar el mensaje es necesario aceptar el aviso de privacidad.
+          </p>
+        </div>
+
+        <button class="form__submit" type="submit">
+          <span class="form__dot" aria-hidden="true" />
+          Enviar mensaje
+        </button>
+        <p class="form__status" role="status" aria-live="polite" data-form-status />
+      </fieldset>
+      {disabled && <Pending label="Servicio de envío del formulario (el formulario está desactivado)" block />}
+    </form>
+  )
+}
+
+<script>
+  import { track } from '@/scripts/track';
+
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const PHONE = /^\+?[\d\s()-]{10,18}$/;
+
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-form-status]');
+    const show = (id: string, invalid: boolean) => {
+      const input = form.querySelector<HTMLInputElement>(`#${id}`);
+      const msg = form.querySelector<HTMLElement>(`[data-error-for="${id}"]`);
+      input?.setAttribute('aria-invalid', String(invalid));
+      if (msg) msg.hidden = !invalid;
+      if (input && msg) {
+        if (invalid) input.setAttribute('aria-describedby', msg.id);
+        else input.removeAttribute('aria-describedby');
+      }
+      return !invalid;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.action) return;
+      const data = new FormData(form);
+      if (String(data.get('website') ?? '')) return; // bot
+
+      const name = String(data.get('nombre') ?? '').trim();
+      const contact = String(data.get('contacto') ?? '').trim();
+      const ok = [
+        show('cf-name', name.length < 2),
+        show('cf-contact', !(EMAIL.test(contact) || PHONE.test(contact))),
+        show('cf-consent', !data.get('consentimiento')),
+      ].every(Boolean);
+      if (!ok) {
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+
+      data.delete('website');
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      if (status) status.textContent = 'Enviando…';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        if (status) status.textContent = 'Gracias. Recibí tu mensaje y te responderé lo antes posible.';
+        track('formulario');
+      } catch {
+        if (status)
+          status.textContent = 'No se pudo enviar el mensaje. Intenta de nuevo o agenda directamente en Doctoralia.';
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .form {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  fieldset {
+    display: grid;
+    gap: var(--space-3);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  fieldset:disabled {
+    opacity: 0.55;
+  }
+
+  .form__legend {
+    color: var(--fg-muted);
+    margin-bottom: var(--space-1);
+  }
+
+  .field {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .field label {
+    font-size: var(--step-small);
+    font-weight: 600;
+  }
+
+  .field input[type='text'],
+  .field textarea {
+    width: 100%;
+    padding: 0.75rem 0;
+    background: transparent;
+    border: 0;
+    border-bottom: var(--hairline) solid var(--fg);
+    border-radius: 0;
+    font-size: 1.0625rem;
+    color: var(--fg);
+    transition: border-color var(--dur-fast) ease;
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 6rem;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .field input:focus-visible,
+  .field textarea:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  .field [aria-invalid='true'] {
+    border-bottom-color: var(--accent-text);
+  }
+
+  .field__hint {
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+  }
+
+  .field__error {
+    font-size: 0.875rem;
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+
+  .field--honey {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .field--check {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    column-gap: var(--space-1);
+  }
+
+  .field--check input {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin-top: 0.15rem;
+    accent-color: var(--c-charcoal);
+  }
+
+  .field--check label {
+    font-weight: 400;
+  }
+
+  .field--check .field__error {
+    grid-column: 1 / -1;
+  }
+
+  .form__submit {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75em;
+    min-height: 3.25rem;
+    padding: 0 1.5rem 0 1.25rem;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border-radius: var(--radius);
+    font-size: var(--step-label);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .form__submit:disabled {
+    cursor: not-allowed;
+  }
+
+  .form__dot {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-orange);
+  }
+
+  .form__status:empty {
+    display: none;
+  }
+
+  .form__status {
+    font-size: var(--step-small);
+  }
+</style>

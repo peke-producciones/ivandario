@@ -68,6 +68,22 @@ const data = {
     /** Formato internacional sin signos: 52 + 10 dígitos. Ej.: confirmed('5281XXXXXXXX') */
     whatsapp: pending<string>('Número profesional de WhatsApp'),
     email: pending<string>('Correo profesional'),
+    /** URL del servicio que recibe el formulario (p. ej. Formspree o Web3Forms). */
+    formEndpoint: pending<string>('Servicio de envío del formulario de contacto'),
+  },
+
+  legal: {
+    /** Domicilio para el aviso de privacidad (puede ser distinto al del consultorio). */
+    privacyAddress: pending<string>('Domicilio del responsable para el aviso de privacidad'),
+    /** El aviso de privacidad es un borrador hasta que lo revise un abogado. */
+    privacyReviewed: false,
+  },
+
+  analytics: {
+    /** Analítica sin cookies. Ej.: confirmed({ provider: 'plausible', domain: 'tudominio.mx' }) */
+    provider: pending<{ provider: 'plausible'; domain: string } | { provider: 'cloudflare'; token: string }>(
+      'Servicio de analítica sin cookies',
+    ),
   },
 
   location: {
@@ -96,6 +112,15 @@ const data = {
     hero: pending<ImageMetadata>('Retrato principal 4:5'),
     about: pending<ImageMetadata>('Retrato «Sobre mí» 3:4'),
     // hero: confirmed(heroPortrait),
+  },
+
+  preview: {
+    /**
+     * Vista previa: todo lo que falta aparece en la página con una etiqueta
+     * «Pendiente» (fotos incluidas). Cambiar a false para el lanzamiento: entonces
+     * lo pendiente se oculta y la guardia impide publicar cualquier marcador.
+     */
+    showPending: true,
   },
 
   seo: {
@@ -150,7 +175,21 @@ const schema = z.object({
   contact: z.object({
     whatsapp: field(z.string().regex(/^52\d{10}$/, 'WhatsApp: 52 seguido de 10 dígitos, sin espacios ni signos')),
     email: field(z.email()),
+    formEndpoint: field(z.url().startsWith('https://')),
   }),
+  legal: z.object({
+    privacyAddress: field(z.string().min(1)),
+    privacyReviewed: z.boolean(),
+  }),
+  analytics: z.object({
+    provider: field(
+      z.discriminatedUnion('provider', [
+        z.object({ provider: z.literal('plausible'), domain: z.string().min(3) }),
+        z.object({ provider: z.literal('cloudflare'), token: z.string().min(10) }),
+      ]),
+    ),
+  }),
+  preview: z.object({ showPending: z.boolean() }),
   location: z.object({ address: field(z.string().min(1)) }),
   schedule: field(z.string().min(1)),
   availability: field(z.string().min(1)),
@@ -171,7 +210,12 @@ const schema = z.object({
   }),
 });
 
-const parsed = schema.safeParse(data);
+const parsed = schema
+  .refine((d) => !(d.seo.indexable && d.preview.showPending), {
+    message: 'No se puede indexar el sitio con la vista previa activa: cambia preview.showPending a false.',
+    path: ['preview', 'showPending'],
+  })
+  .safeParse(data);
 if (!parsed.success) {
   throw new Error(`src/config/site.ts contiene datos inválidos:\n${z.prettifyError(parsed.error)}`);
 }
