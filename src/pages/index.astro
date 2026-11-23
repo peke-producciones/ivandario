@@ -11,9 +11,13 @@ import Services from '@/components/sections/Services.astro';
 import Content from '@/components/sections/Content.astro';
 import Faq from '@/components/sections/Faq.astro';
 import Contact from '@/components/sections/Contact.astro';
+import { homeSchema } from '@/lib/schema';
+import { url } from '@/lib/url';
+
+const schema = homeSchema(new URL(url('/'), Astro.site), new URL(url('/og.png'), Astro.site).href);
 ---
 
-<BaseLayout>
+<BaseLayout schema={schema}>
   <Header isHome />
   <main id="contenido-principal">
     <Hero />

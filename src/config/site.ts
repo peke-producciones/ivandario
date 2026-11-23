@@ -130,6 +130,8 @@ const data = {
      */
     indexable: false,
     locale: 'es_MX',
+    /** Código de verificación de Google Search Console (meta «google-site-verification»). */
+    googleVerification: pending<string>('Código de verificación de Google Search Console'),
     title: 'Iván Darío · Psicoterapeuta en Monterrey y en línea',
     description:
       'Psicoterapia individual para adultos y adolescentes, presencial en Monterrey y área metropolitana, y en línea. Sesiones de 45 a 60 minutos, $700 MXN.',
@@ -205,6 +207,7 @@ const schema = z.object({
   seo: z.object({
     indexable: z.boolean(),
     locale: z.string(),
+    googleVerification: field(z.string().min(10)),
     title: z.string().max(70),
     description: z.string().max(170),
   }),

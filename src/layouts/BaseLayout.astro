@@ -9,6 +9,7 @@ import playfairLatin from '@fontsource-variable/playfair-display/files/playfair-
 import playfairItalicLatin from '@fontsource-variable/playfair-display/files/playfair-display-latin-wght-italic.woff2?url';
 
 import { site } from '@/config/site';
+import { valueOf } from '@/lib/pending';
 import { url } from '@/lib/url';
 
 interface Props {
@@ -16,11 +17,18 @@ interface Props {
   description?: string;
   /** Fuerza noindex en páginas concretas (p. ej. utilidades). */
   noindex?: boolean;
+  /** Datos estructurados JSON-LD de la página. */
+  schema?: object;
 }
 
-const { title = site.seo.title, description = site.seo.description, noindex = false } = Astro.props;
+const { title = site.seo.title, description = site.seo.description, noindex = false, schema } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const indexable = site.seo.indexable && !noindex;
+const ogImage = new URL(url('/og.png'), Astro.site).href;
+const verification = valueOf(site.seo.googleVerification);
+const analytics = valueOf(site.analytics.provider);
+const plausibleDomain = analytics?.provider === 'plausible' ? analytics.domain : undefined;
+const cloudflareBeacon = analytics?.provider === 'cloudflare' ? JSON.stringify({ token: analytics.token }) : undefined;
 ---
 
 <!doctype html>
@@ -37,6 +45,7 @@ const indexable = site.seo.indexable && !noindex;
     <link rel="canonical" href={canonical} />
     <meta name="robots" content={indexable ? 'index, follow' : 'noindex, nofollow'} />
     {site.preview.showPending && <meta name="x-preview" content="pending-visible" />}
+    {verification && <meta name="google-site-verification" content={verification} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={site.seo.locale} />
@@ -44,16 +53,37 @@ const indexable = site.seo.indexable && !noindex;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content={`${site.person.displayName}, ${site.person.profession.toLowerCase()} en Monterrey y en línea`}
+    />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
 
     <meta name="theme-color" content="#f5f2ec" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
 
     <link rel="preload" href={playfairLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={playfairItalicLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={manropeLatin} as="font" type="font/woff2" crossorigin />
+
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+
+    {/* Analítica sin cookies: solo se carga si está configurada en site.ts */}
+    {plausibleDomain && <script is:inline src={url('/plausible-queue.js')} />}
+    {plausibleDomain && <script is:inline defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" />}
+    {
+      cloudflareBeacon && (
+        <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={cloudflareBeacon} />
+      )
+    }
 
     <slot name="head" />
   </head>

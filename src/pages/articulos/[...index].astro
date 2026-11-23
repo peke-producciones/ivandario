@@ -1,0 +1,92 @@
+---
+/**
+ * Índice de artículos. Solo se genera cuando hay al menos un artículo publicado.
+ */
+import { getCollection } from 'astro:content';
+import PageLayout from '@/layouts/PageLayout.astro';
+import Folio from '@/components/ui/Folio.astro';
+import { site } from '@/config/site';
+import { url } from '@/lib/url';
+
+export async function getStaticPaths() {
+  const published = await getCollection('articulos', ({ data }) => !data.draft);
+  return published.length ? [{ params: { index: undefined } }] : [];
+}
+
+const articles = (await getCollection('articulos', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const fmt = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long' });
+---
+
+<PageLayout
+  title={`Artículos · ${site.person.displayName}`}
+  description="Reflexiones sobre psicología, relaciones, emociones y situaciones de la vida cotidiana."
+>
+  <section class="list grid">
+    <Folio>Artículos</Folio>
+    <h1 class="list__title">Psicología para entender lo que vivimos.</h1>
+    <ol role="list" class="list__items">
+      {
+        articles.map((a) => (
+          <li>
+            <a href={url(`/articulos/${a.id}/`)} class="item">
+              <time class="label muted" datetime={a.data.date.toISOString()}>
+                {fmt.format(a.data.date)}
+              </time>
+              <span class="item__title">{a.data.title}</span>
+              <span class="item__desc muted">{a.data.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</PageLayout>
+
+<style>
+  .list {
+    padding-block: var(--space-6) var(--section-y);
+    row-gap: var(--space-4);
+  }
+
+  .list__title {
+    font-size: var(--step-h2);
+    max-width: 18ch;
+  }
+
+  .list__items {
+    border-top: var(--hairline) solid var(--rule-strong);
+  }
+
+  .item {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: var(--space-4);
+    border-bottom: var(--hairline) solid var(--rule);
+    text-decoration: none;
+  }
+
+  .item__title {
+    font-family: var(--font-display);
+    font-size: var(--step-h3);
+    line-height: 1.2;
+  }
+
+  .item:hover .item__title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .item__desc {
+    max-width: 60ch;
+  }
+
+  @media (min-width: 64rem) {
+    .list > :global(*) {
+      grid-column: col-start 3 / col-end 10;
+    }
+  }
+</style>
