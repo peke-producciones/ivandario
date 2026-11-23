@@ -45,6 +45,11 @@ const show = site.preview.showPending;
     color: var(--fg);
   }
 
+  /* Sobre fondo oscuro, sin tinte: mantiene el contraste AA del naranja */
+  :global([data-tone='dark']) .pending {
+    background: transparent;
+  }
+
   .pending--block {
     display: flex;
     width: 100%;

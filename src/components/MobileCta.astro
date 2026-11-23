@@ -43,9 +43,7 @@ const whatsapp = valueOf(site.contact.whatsapp);
     display: flex;
     gap: var(--space-1);
     padding: var(--space-1) var(--margin) calc(var(--space-1) + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--c-ivory) 94%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: var(--c-ivory); /* opaco: el contraste no depende de lo que pase por detrás */
     border-top: var(--hairline) solid var(--rule);
     transition:
       transform var(--dur) var(--ease-out),

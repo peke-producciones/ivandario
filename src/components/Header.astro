@@ -13,10 +13,11 @@ const { displayName, profession } = site.person;
 
 <header class="header" data-header>
   <div class="header__inner">
-    <a class="brand" href={url('/')} aria-label={`${displayName}, ${profession.toLowerCase()}. Ir al inicio`}>
+    <a class="brand" href={url('/')}>
       <span class="brand__name">{displayName}</span>
       <span class="brand__dot" aria-hidden="true"></span>
       <span class="brand__role">{profession}</span>
+      <span class="visually-hidden">, ir al inicio</span>
     </a>
 
     <nav class="nav" aria-label="Principal">
@@ -105,9 +106,7 @@ const { displayName, profession } = site.person;
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--c-ivory) 92%, transparent);
-    -webkit-backdrop-filter: saturate(1.2) blur(12px);
-    backdrop-filter: saturate(1.2) blur(12px);
+    background: var(--c-ivory); /* opaco: el contraste no depende de lo que pase por detrás */
     border-bottom: var(--hairline) solid transparent;
     transition: border-color var(--dur) var(--ease-out);
   }
