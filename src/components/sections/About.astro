@@ -149,13 +149,13 @@ const showBlocks = blocks.some((b) => b.value) || site.preview.showPending;
   }
 
   @media (min-width: 48rem) {
+    /* Tableta: retrato a sangre a la derecha y texto a lo ancho debajo */
     .about__media {
-      grid-column: full-start / col-end 5;
+      grid-column: col-start 3 / full;
     }
 
-    :global(.about--photo) .about__text {
-      grid-column: col-start 6 / content-end;
-      align-self: end;
+    .about__text {
+      grid-column: col-start 1 / col-end 7;
     }
 
     .creds {
@@ -175,6 +175,7 @@ const showBlocks = blocks.some((b) => b.value) || site.preview.showPending;
 
     :global(.about--photo) .about__text {
       grid-column: col-start 7 / content-end;
+      align-self: end;
     }
 
     :global(.about--type) .about__text {

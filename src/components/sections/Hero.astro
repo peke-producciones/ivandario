@@ -235,6 +235,19 @@ const { inPerson } = site.modalities;
 
   /* ── Tableta ───────────────────────────────────────────────────────────── */
   @media (min-width: 48rem) {
+    /* El titular también respeta la altura de la ventana (escritorio y
+       teléfonos en horizontal): la franja de datos queda visible sin scroll. */
+    .hero {
+      --hero-chrome: 26.5rem; /* alto de lo que no es titular: folio, cuerpo, datos y márgenes */
+    }
+
+    .hero__title {
+      font-size: max(
+        2.5rem,
+        min(var(--step-display), 12.2cqi, calc((100svh - var(--header-h) - var(--hero-chrome)) / 4.15))
+      );
+    }
+
     .hero__grid {
       grid-template-rows: auto auto auto 1fr auto;
       row-gap: var(--space-4);
@@ -305,16 +318,6 @@ const { inPerson } = site.modalities;
       row-gap: var(--space-3);
     }
 
-    /* En escritorio el titular también respeta la altura de la ventana:
-       la franja de datos (precio, duración, modalidad) queda visible sin scroll. */
-    .hero__title {
-      font-size: max(3.25rem, min(var(--step-display), 12.2cqi, calc((100svh - var(--header-h) - var(--hero-chrome)) / 4.15)));
-    }
-
-    .hero {
-      /* alto de todo lo que no es titular: folio, cuerpo, datos y márgenes */
-      --hero-chrome: 26.5rem;
-    }
 
     /* Entrada y botones lado a lado: lectura en Z, menos altura */
     .hero__body {
